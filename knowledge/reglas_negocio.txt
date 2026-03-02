@@ -1,0 +1,2 @@
+REGLAS DE NEGOCIO (ejemplo)
+- Completa con reglas específicas del dominio.

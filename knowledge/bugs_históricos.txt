@@ -1,0 +1,2 @@
+BUGS HISTÓRICOS (ejemplo)
+- Completa con bugs reales (síntoma, causa, módulo, severidad).
