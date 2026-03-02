@@ -8,6 +8,7 @@ from haystack.document_stores.in_memory import InMemoryDocumentStore
 from haystack.components.retrievers.in_memory import InMemoryBM25Retriever
 from haystack.components.builders.prompt_builder import PromptBuilder
 from haystack.components.generators.openai import OpenAIGenerator
+from haystack.utils.auth import Secret
 
 
 QA_PROMPT_TEMPLATE = """Eres un QA Lead experto en diseño avanzado de casos de prueba.
@@ -121,7 +122,7 @@ class QATestCaseArchitect:
         if not api_key:
             raise RuntimeError("OPENAI_API_KEY no está configurada. Crea un .env basado en .env.example")
 
-        self.generator = OpenAIGenerator(model=model, api_key=api_key)
+        self.generator = OpenAIGenerator(model=model, api_key=Secret.from_env_var("OPENAI_API_KEY"))
 
         self.pipeline = Pipeline()
         self.pipeline.add_component("retriever", self.retriever)
@@ -135,7 +136,10 @@ class QATestCaseArchitect:
 
     def reindex(self) -> dict[str, Any]:
         docs = load_knowledge_documents(self.knowledge_dir)
-        self.document_store.delete_documents()
+        existing = self.document_store.filter_documents()
+        existing_ids = [d.id for d in existing]
+        if existing_ids:
+            self.document_store.delete_documents(existing_ids)
         if docs:
             self.document_store.write_documents(docs)
         return {"indexed": len(docs)}

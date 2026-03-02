@@ -32,7 +32,7 @@ class GenerateResponse(BaseModel):
 def reindex() -> dict:
     try:
         return get_agent().reindex()
-    except RuntimeError as e:
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -50,5 +50,5 @@ def generate(req: GenerateRequest) -> GenerateResponse:
     try:
         out = get_agent().generate(query=query, top_k=req.top_k)
         return GenerateResponse(**out)
-    except RuntimeError as e:
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
