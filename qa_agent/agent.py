@@ -115,14 +115,33 @@ class QATestCaseArchitect:
         self.knowledge_dir = knowledge_dir
         self.document_store = InMemoryDocumentStore()
         self.retriever = InMemoryBM25Retriever(document_store=self.document_store)
-        self.prompt_builder = PromptBuilder(template=QA_PROMPT_TEMPLATE)
+        self.prompt_builder = PromptBuilder(
+            template=QA_PROMPT_TEMPLATE,
+            required_variables=["documents", "query"],
+        )
 
-        model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise RuntimeError("OPENAI_API_KEY no está configurada. Crea un .env basado en .env.example")
+        llm_provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()
+        if llm_provider == "openai":
+            model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise RuntimeError("OPENAI_API_KEY no está configurada. Crea un .env basado en .env.example")
 
-        self.generator = OpenAIGenerator(model=model, api_key=Secret.from_env_var("OPENAI_API_KEY"))
+            self.generator = OpenAIGenerator(model=model, api_key=Secret.from_env_var("OPENAI_API_KEY"))
+        elif llm_provider in {"ollama", "ollama_cloud", "ollama-cloud"}:
+            model = os.getenv("OLLAMA_MODEL", "llama3.2")
+            api_key = os.getenv("OLLAMA_API_KEY")
+            if not api_key:
+                raise RuntimeError("OLLAMA_API_KEY no está configurada. Crea una API key en https://ollama.com/settings/keys")
+
+            api_base_url = os.getenv("OLLAMA_API_BASE_URL", "https://ollama.com/v1")
+            self.generator = OpenAIGenerator(
+                model=model,
+                api_key=Secret.from_env_var("OLLAMA_API_KEY"),
+                api_base_url=api_base_url,
+            )
+        else:
+            raise RuntimeError(f"LLM_PROVIDER inválido: {llm_provider}. Usa 'openai' u 'ollama_cloud'.")
 
         self.pipeline = Pipeline()
         self.pipeline.add_component("retriever", self.retriever)
