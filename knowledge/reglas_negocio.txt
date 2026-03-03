@@ -1,2 +1,267 @@
-REGLAS DE NEGOCIO (ejemplo)
-- Completa con reglas específicas del dominio.
+==============================
+1. DEFINICIONES CLAVE
+==============================
+
+Término: Regla de negocio
+Definición: Condición o restricción lógica que controla el comportamiento del sistema.
+
+Término: Autorización
+Definición: Permiso asociado a un usuario para acceder a un espacio en fecha y hora específicas.
+
+Término: Antipassback
+Definición: Lógica que impide una segunda entrada o salida consecutiva sin una transición opuesta previa registrada.
+
+Término: Locker
+Definición: Compartimiento físico asignable desde el sistema para uso temporal o fijo.
+
+Término: Aforo
+Definición: Capacidad máxima permitida de personas en una zona específica.
+
+Término: Espacio de trabajo
+Definición: Área asignada para uso individual o compartido.
+
+Término: Reserva
+Definición: Acción de apartar un recurso durante un tiempo definido.
+
+==============================
+2. ORGANIZACIÓN
+==============================
+2.1 Copropiedades
+
+Regla: Nombre único
+Condición: No puede existir otra copropiedad con el mismo nombre.
+Validación: Comparación exacta.
+Impacto: Creación / Edición.
+
+Regla: Empresa obligatoria
+Condición: Debe tener al menos una empresa asociada.
+Validación: Empresas asociadas >= 1.
+
+Regla: Activación / Desactivación
+Condición: Puede activarse o desactivarse sin eliminar historial.
+Impacto: Conservación de históricos.
+
+Regla: Zona principal obligatoria
+Condición: Siempre debe existir una zona principal por defecto.
+
+Regla: Grupo de puertas padre obligatorio
+Condición: No puede eliminarse.
+
+Regla: Configuración independiente
+Condición: Puede tener aforos, horarios y accesos propios.
+
+Regla: Dispositivos
+Condición: Un dispositivo puede tener múltiples puertas.
+
+Regla: Radio de proximidad
+Condición: Configurable para validar ubicación.
+
+2.2 Empresas
+
+Regla: Asociación obligatoria
+Condición: Toda empresa debe pertenecer a una copropiedad.
+
+Regla: Nombre único por copropiedad
+Condición: No puede repetirse dentro de la misma copropiedad.
+
+Regla: Eliminación restringida
+Condición: No se puede eliminar si tiene usuarios o autorizaciones activas.
+
+Regla: Activación / Desactivación
+Impacto: Afecta acceso de todos sus usuarios.
+
+Regla: Validaciones personalizadas
+Condición: Puede definir horarios y requisitos propios.
+
+==============================
+3. CONTROL DE ACCESO
+==============================
+
+MODULO
+: Control de Acceso
+
+3.1 Dashboard de ocupación
+
+Regla: Filtrado granular
+Permite filtrar por copropiedad, zona, empresa y rango de tiempo.
+
+Regla: Visualización temporal
+Debe mostrar gráficos de líneas con métricas promedio y máximo.
+
+3.2 Usuarios
+
+Regla: Restauración
+Condición: Solo restaura configuración previa a desactivación.
+Restricción: No editable durante restauración.
+
+3.3 Visitantes
+
+Regla: Tipos de acceso permitidos
+Opciones: QR, DNI, Facial, Manual, RFID, LPR (próximo).
+
+Campo: DNI
+Requerido: Sí
+Unicidad: Por propiedad
+Formato: Alfanumérico
+
+Campo: Email
+Requerido: Sí
+Unicidad: Por propiedad
+Formato: Email válido
+
+Campo: Teléfono
+Requerido: Sí
+Longitud mínima: 10 dígitos
+
+Campo: RFID
+Requerido: No
+Unicidad: Por propiedad
+
+Regla: Horarios
+Condición: Obligatorios si se configuran días de semana.
+
+Regla: Validación de autorización
+Condición: Usuario autorizador debe existir y tener acceso a la propiedad.
+
+Regla: Restricción funcional
+Condición: Visitantes no pueden crear ni reservar puestos.
+
+3.4 Historial de accesos
+
+Regla: Trazabilidad completa
+Condición: Todo acceso debe registrarse con fecha, hora, método y zona.
+
+==============================
+4. ESPACIOS DE TRABAJO
+==============================
+
+MODULO
+: Espacios de Trabajo
+
+Regla: Pre-checkin
+Condición: Si ocurre antes de la reserva, se reconoce como acceso.
+
+Regla: Checkin por área
+Impacto: Registra acceso al puesto y al área.
+
+Regla: Checkin por puesto
+Impacto: Solo registra acceso al puesto.
+
+Regla: Consistencia de zonas
+Condición: Zona interior y exterior deben ser idénticas.
+
+Regla: Métodos de checkin
+Opciones: Cédula, Manual, Facial, RFID, QR.
+
+Regla: Límite de tiempo
+Configuración obligatoria.
+
+Regla: Reservas masivas
+Permitidas.
+
+Regla: Permisos de reserva
+Se pueden configurar permisos para reservar a terceros.
+
+Regla: Reservas multidía
+Configurables.
+
+Regla: Límite de reservas
+Configuración de máximo permitido.
+
+Regla: Límite de anticipación
+Configurable.
+
+Regla: Límite temprano
+Restricción para reservas demasiado anticipadas.
+
+Regla: Límite máximo por período
+Configurable.
+
+==============================
+5. SALAS
+==============================
+
+Regla: Anticipación
+Configuración por propiedad.
+
+Regla: Duración
+Duración mínima y máxima configurable.
+
+Regla: Límite de reservas
+Máximo por período configurable.
+
+Regla: Reservas simultáneas
+No se permiten superposiciones.
+
+Regla: Recurrencia
+Soporta reservas diarias, semanales y mensuales.
+
+==============================
+6. LOCKERS
+==============================
+
+Regla: Asignación
+Puede ser automática o manual.
+
+Regla: Duración
+Configuración obligatoria de tiempo de uso.
+
+Regla: Liberación
+Debe liberarse automáticamente al finalizar uso.
+
+Regla: Reutilización
+Disponible después de liberación.
+
+Regla: Trazabilidad
+Debe registrar asignación y liberación.
+
+==============================
+7. AFOROS
+==============================
+
+Regla: Capacidad máxima
+Configuración obligatoria por zona.
+
+Regla: Ocupación dinámica
+Debe actualizarse en tiempo real.
+
+Regla: Sobreaforo
+Debe bloquear accesos cuando se supere límite.
+
+Regla: Integración
+Debe integrarse con accesos y reservas.
+
+==============================
+8. COMUNICACIÓN
+==============================
+
+Regla: Formularios de salubridad
+Deben poder asociarse a reservas o accesos.
+
+Regla: Formularios de reserva
+Deben validarse antes de confirmar reserva.
+
+==============================
+9. RELACIONES ENTRE MÓDULOS
+==============================
+
+Relación: Empresa → Copropiedad
+Dependencia obligatoria.
+
+Relación: Visitante → Empresa → Copropiedad
+Jerarquía obligatoria.
+
+Relación: Reserva → Espacio/Sala → Copropiedad
+Dependencia estructural.
+
+Relación: Acceso → Aforo
+Debe validar capacidad antes de permitir ingreso.
+
+Relación: Acceso → Antipassback
+Debe validar transición válida.
+
+Relación: Usuario → Permisos → Módulos
+Acceso condicionado por rol.
+
+Relación: Lockers → Accesos
+Asignación puede depender de ingreso válido.

@@ -1,10 +1,12 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from qa_agent.agent import QATestCaseArchitect
 
 
 app = FastAPI(title="Test Case Architect Agent v1")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 _agent: QATestCaseArchitect | None = None
 
 
