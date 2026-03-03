@@ -139,9 +139,23 @@ class QATestCaseArchitect:
                 model=model,
                 api_key=Secret.from_env_var("OLLAMA_API_KEY"),
                 api_base_url=api_base_url,
+                timeout=120,
+            )
+        elif llm_provider in {"deepseek"}:
+            model = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
+            api_key = os.getenv("DEEPSEEK_API_KEY")
+            if not api_key:
+                raise RuntimeError("DEEPSEEK_API_KEY no está configurada. Crea una API key en https://platform.deepseek.com/")
+
+            api_base_url = os.getenv("DEEPSEEK_API_BASE_URL", "https://api.deepseek.com/v1")
+            self.generator = OpenAIGenerator(
+                model=model,
+                api_key=Secret.from_env_var("DEEPSEEK_API_KEY"),
+                api_base_url=api_base_url,
+                timeout=120,
             )
         else:
-            raise RuntimeError(f"LLM_PROVIDER inválido: {llm_provider}. Usa 'openai' u 'ollama_cloud'.")
+            raise RuntimeError(f"LLM_PROVIDER inválido: {llm_provider}. Usa 'openai', 'ollama_cloud' o 'deepseek'.")
 
         self.pipeline = Pipeline()
         self.pipeline.add_component("retriever", self.retriever)
