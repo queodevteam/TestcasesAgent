@@ -52,14 +52,156 @@
   <div id="status" class="mt-4 text-sm"></div>
 
   <section id="outputSection" class="mt-6 hidden">
-    <h2 class="text-xl font-semibold mb-2">Resultado</h2>
-    <pre id="jsonOutput" class="json-output bg-gray-100 border rounded p-4 max-h-96 overflow-auto"></pre>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">Casos de prueba generados</h2>
+      <div class="flex gap-2">
+        <input type="text" id="searchInput" placeholder="Buscar casos..." class="border rounded px-2 py-1 text-sm">
+        <select id="categoryFilter" class="border rounded px-2 py-1 text-sm">
+          <option value="">Todas las categorías</option>
+          <option value="positive">Positivos</option>
+          <option value="negative">Negativos</option>
+          <option value="boundary">Límite</option>
+          <option value="state_transition">Transición de estado</option>
+          <option value="regression">Regresión</option>
+          <option value="high_risk">Alto riesgo</option>
+        </select>
+        <select id="priorityFilter" class="border rounded px-2 py-1 text-sm">
+          <option value="">Todas las prioridades</option>
+          <option value="P0">P0</option>
+          <option value="P1">P1</option>
+          <option value="P2">P2</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Decision Table -->
+    <div id="decisionTableSection" class="mb-6 hidden">
+      <h3 class="text-lg font-semibold mb-2">Tabla de decisiones</h3>
+      <div class="overflow-x-auto border rounded">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr id="decisionTableHeaders"></tr>
+          </thead>
+          <tbody id="decisionTableRows" class="bg-white divide-y divide-gray-200"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Conditions -->
+    <div id="conditionsSection" class="mb-6 hidden">
+      <h3 class="text-lg font-semibold mb-2">Condiciones identificadas</h3>
+      <div id="conditionsList" class="space-y-3"></div>
+    </div>
+
+    <!-- Test Cases Cards -->
+    <div id="testCasesContainer" class="space-y-4"></div>
+
+    <!-- Raw JSON (collapsible) -->
+    <details class="mt-6 border rounded p-4 bg-gray-50">
+      <summary class="cursor-pointer font-medium">Ver JSON crudo</summary>
+      <pre id="jsonOutput" class="json-output mt-2 text-xs overflow-auto max-h-64"></pre>
+    </details>
   </section>
 </div>
 
 <script>
 const API_BASE = 'http://127.0.0.1:8000';
 let lastResult = null;
+let allTestCases = [];
+
+function renderDecisionTable(table) {
+  const section = document.getElementById('decisionTableSection');
+  const headersEl = document.getElementById('decisionTableHeaders');
+  const rowsEl = document.getElementById('decisionTableRows');
+  if (!table || !table.applicable) {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+  headersEl.innerHTML = table.headers.map(h => `<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('');
+  rowsEl.innerHTML = table.rows.map(row => `<tr>${row.map(cell => `<td class="px-4 py-2 text-sm text-gray-900">${cell}</td>`).join('')}</tr>`).join('');
+}
+
+function renderConditions(conditions) {
+  const section = document.getElementById('conditionsSection');
+  const listEl = document.getElementById('conditionsList');
+  if (!conditions || conditions.length === 0) {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+  listEl.innerHTML = conditions.map(c => `
+    <div class="border rounded p-3 bg-gray-50">
+      <h4 class="font-medium text-sm">${c.name}</h4>
+      <p class="text-xs text-gray-600 mt-1">${c.description}</p>
+      <div class="mt-2">
+        <strong class="text-xs">Particiones:</strong>
+        <ul class="text-xs list-disc list-inside">${c.equivalence_partitions.map(p => `<li>${p}</li>`).join('')}</ul>
+      </div>
+      <div class="mt-1">
+        <strong class="text-xs">Valores límite:</strong>
+        <ul class="text-xs list-disc list-inside">${c.boundary_values.map(v => `<li>${v}</li>`).join('')}</ul>
+      </div>
+      ${c.notes ? `<p class="text-xs text-gray-500 mt-1"><strong>Notas:</strong> ${c.notes}</p>` : ''}
+    </div>
+  `).join('');
+}
+
+function categoryColor(cat) {
+  const colors = {
+    positive: 'bg-green-100 border-green-300',
+    negative: 'bg-red-100 border-red-300',
+    boundary: 'bg-yellow-100 border-yellow-300',
+    state_transition: 'bg-blue-100 border-blue-300',
+    regression: 'bg-purple-100 border-purple-300',
+    high_risk: 'bg-orange-100 border-orange-300'
+  };
+  return colors[cat] || 'bg-gray-100 border-gray-300';
+}
+
+function priorityBadge(p) {
+  const colors = { P0: 'bg-red-600', P1: 'bg-orange-500', P2: 'bg-yellow-500' };
+  return `<span class="inline-block px-2 py-1 text-xs text-white rounded ${colors[p] || 'bg-gray-500'}">${p}</span>`;
+}
+
+function renderTestCaseCard(tc) {
+  return `
+    <div class="border rounded p-4 ${categoryColor(tc.category)}" data-id="${tc.id}" data-category="${tc.category}" data-priority="${tc.priority}">
+      <div class="flex justify-between items-start mb-2">
+        <h3 class="font-semibold text-sm">${tc.id} - ${tc.title}</h3>
+        ${priorityBadge(tc.priority)}
+      </div>
+      <div class="text-xs text-gray-600 mb-2">
+        <span class="inline-block px-2 py-1 bg-gray-200 rounded mr-1">${tc.category}</span>
+        ${tc.technique_applied.map(t => `<span class="inline-block px-2 py-1 bg-blue-200 rounded mr-1">${t}</span>`).join('')}
+      </div>
+      <details class="mb-2">
+        <summary class="cursor-pointer text-xs font-medium">Ver detalles</summary>
+        <div class="mt-2 text-xs space-y-2">
+          <div><strong>Precondiciones:</strong><ul>${tc.preconditions.map(p => `<li>${p}</li>`).join('')}</ul></div>
+          <div><strong>Pasos:</strong><ol>${tc.steps.map(s => `<li>${s}</li>`).join('')}</ol></div>
+          <div><strong>Resultado esperado:</strong> ${tc.expected_result}</div>
+          ${tc.risk_rationale ? `<div><strong>Riesgo:</strong> ${tc.risk_rationale}</div>` : ''}
+          ${tc.regression_links && tc.regression_links.length ? `<div><strong>Links regresión:</strong><ul>${tc.regression_links.map(l => `<li>${l}</li>`).join('')}</ul></div>` : ''}
+          ${tc.integration_impact && tc.integration_impact.length ? `<div><strong>Impacto:</strong><ul>${tc.integration_impact.map(i => `<li>${i}</li>`).join('')}</ul></div>` : ''}
+        </div>
+      </details>
+    </div>
+  `;
+}
+
+function filterAndRender() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const catFilter = document.getElementById('categoryFilter').value;
+  const priFilter = document.getElementById('priorityFilter').value;
+  const filtered = allTestCases.filter(tc => {
+    const matchSearch = !search || tc.title.toLowerCase().includes(search) || tc.expected_result.toLowerCase().includes(search);
+    const matchCat = !catFilter || tc.category === catFilter;
+    const matchPri = !priFilter || tc.priority === priFilter;
+    return matchSearch && matchCat && matchPri;
+  });
+  document.getElementById('testCasesContainer').innerHTML = filtered.map(renderTestCaseCard).join('');
+}
 
 document.getElementById('qaForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -94,6 +236,22 @@ document.getElementById('qaForm').addEventListener('submit', async (e) => {
     lastResult = await res.json();
     jsonOutput.textContent = JSON.stringify(lastResult, null, 2);
     outputSection.classList.remove('hidden');
+
+    // Parse and render structured sections
+    let parsed;
+    try {
+      parsed = JSON.parse(lastResult.raw);
+      console.log('Parsed raw:', parsed);
+    } catch (e) {
+      console.error('Failed to parse raw JSON:', e);
+      parsed = {};
+    }
+    renderDecisionTable(parsed.decision_table);
+    renderConditions(parsed.conditions);
+    allTestCases = parsed.test_cases || [];
+    console.log('Test cases loaded:', allTestCases.length);
+    filterAndRender();
+
     status.textContent = '✅ Generación completada';
     status.className = 'mt-4 text-sm text-green-600';
   } catch (ex) {
@@ -101,6 +259,10 @@ document.getElementById('qaForm').addEventListener('submit', async (e) => {
     status.className = 'mt-4 text-sm text-red-600';
   }
 });
+
+document.getElementById('searchInput').addEventListener('input', filterAndRender);
+document.getElementById('categoryFilter').addEventListener('change', filterAndRender);
+document.getElementById('priorityFilter').addEventListener('change', filterAndRender);
 
 document.getElementById('exportJson').addEventListener('click', () => {
   if (!lastResult) return;
