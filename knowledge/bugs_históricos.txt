@@ -1,2 +1,625 @@
-BUGS HISTÓRICOS (ejemplo)
-- Completa con bugs reales (síntoma, causa, módulo, severidad).
+================================================================================
+KNOWLEDGE BASE - BUGS HISTÓRICOS DE QUEO ACCESS
+Fuente: CHANGELOG.md del proyecto QueoAccessMonolith
+Propósito: Contexto para agente IA de QA en generación de casos de prueba
+           a partir de Historias de Usuario (HU)
+================================================================================
+
+TOTAL DE BUGS REGISTRADOS: 390
+VERSIONES ANALIZADAS: desde v1.x hasta v28.1.4 (2021 - 2026)
+
+INSTRUCCIONES PARA EL AGENTE QA:
+--------------------------------------------------------------------------------
+Cuando recibas una Historia de Usuario (HU), consulta esta base de conocimiento
+para identificar el módulo funcional correspondiente y usa los bugs históricos
+de ese módulo para:
+  1. Generar casos de prueba NEGATIVOS (escenarios que históricamente han fallado)
+  2. Generar casos de prueba de REGRESIÓN (verificar que bugs corregidos no vuelvan)
+  3. Identificar CASOS BORDE frecuentes en ese módulo
+  4. Priorizar áreas de mayor riesgo (Reservas y Visitantes tienen más bugs históricos)
+
+DISTRIBUCIÓN DE BUGS POR MÓDULO:
+--------------------------------------------------------------------------------
+  RESERVAS DE SALAS Y PUESTOS DE TRABAJO: 100 bugs
+  VISITANTES Y AUTORIZACIONES: 67 bugs
+  CONFIGURACIÓN, ROLES Y OTROS: 63 bugs
+  USUARIOS E IMPORTACIÓN: 61 bugs
+  CONTROL DE ACCESO (RFID / QR / FACIAL / LPR): 32 bugs
+  SINCRONIZACIÓN (DA / FACIAL / MQTT): 18 bugs
+  EMPRESAS Y COPROPIEDADES: 18 bugs
+  HISTORIAL DE ACCESOS: 11 bugs
+  CAMPOS PERSONALIZADOS Y FORMULARIOS: 10 bugs
+  NOTIFICACIONES Y CORREOS: 8 bugs
+  VEHÍCULOS: 2 bugs
+
+
+================================================================================
+MÓDULO: RESERVAS DE SALAS Y PUESTOS DE TRABAJO
+Total de bugs históricos: 100
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Errores al crear reservas con zonas horarias distintas al servidor
+  • Fallos en el flujo de check-in / pre-checkin con formularios asociados
+  • Problemas con reservas recurrentes y cancelación masiva
+  • Filtros de estado y disponibilidad incorrectos
+  • Errores al reservar puestos desde el mapa o selector
+  • Notificaciones de cancelación enviadas incorrectamente
+  • Validaciones de duración mínima/máxima no aplicadas
+  • Errores al editar reservas desde la app móvil
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [82] | 28.1.1] - (13/02/2026 | Se corrige error al crear una reserva desde la app móvil, cuando no coincide la zona horaria con la del servidor.
+  [RT-I664] | 26.24.7] - (13/08/2025 | Se corrige el fallo al momento de hacer pre-checkin en espacios de trabajo cuando posee formularios.
+  [RT-I664] | 26.24.4] - (12/08/2025 | Se corrige el fallo al momento de crear una reserva en espacios de trabajo cuando no posee formularios.
+  [RT-I637] | 26.24.3] - (11/08/2025 | Se ajusta el formulario de checking para que aparezca cuando se debe, tambien se redujo la cantidad de informacion que llega al momento de consultar el estado de las reservas en el mapa de salas evitando errores.
+  [QUEOA-68] | v24.1.0] - (13/08/2024 | Se ajusta el filtro de estado en reservaciones.
+  [QAW-15562] | v23.0.0] - (09/07/2024 | Se realizan correcciones para los settings de copropiedad de "Acceso" y "Reserva de espacios".
+  [QAW-14430] | v21.1.0] - (11/04/2024 | Se agrega include para cargar formulario en selector de puestos desde el mapa
+  [QAW-14553] | v21.1.0] - (11/04/2024 | Se ajusta la consulta del formulario asociado al puesto en fastrack.
+  [QAW-14303] | v20.8.2] - (28/02/2024 | Se soluciona problema en acceso con pre checking en el flujo MQTT.
+  [QAW-11652] | v20.6.0] - (27/12/2023 | Se corrige el envío de correo al cancelar una reserva aunque tenga el "setting" de notificar a los ocupantes apagado.
+  [QAW-11652] | v20.6.0] - (27/12/2023 | Se envía el send_notify de cancelación de reservaciones en params 0 o 1 en vez de true o false para que lo tome como un booleano desde back.
+  [QAW-12384] | v19.2.1] - (13/10/2023 | Se corrige error al seleccionar un puesto de trabajo al reservar.
+  [QAW-12398] | v19.2.1] - (13/10/2023 | Se elimina la redirección de Company Reception a /reservations/forms.
+  [QAW-11699] | v19.0.0] - (01/09/2023 | Se ajusta el backend para que los puestos puedan reservarse por más de 23:59 hrs.
+  [QAW-11974] | v19.0.0] - (01/09/2023 | Se ajusta opción de ver accesos desde reservaciones.
+  [QAW-11717] | v19.0.0] - (01/09/2023 | Se corrige ocultamiento del módulo, por el conflicto de hora (00:00hrs) en la reserva.
+  [QAW-11718] | v19.0.0] - (01/09/2023 | Se corrige al crear/editar reservas no se estaba guardando el comentario.
+  [QAW-11719] | v19.0.0] - (01/09/2023 | Mejora de UI en modales de reservaciones.
+  [QAW-11684] | v18.8.6] - (29/08/2023 | Se corrige error de validación de check de pre checkin en edición de áreas de trabajo.
+  [QAW-10289] | v18.7.2] - (08/08/2023 | Se añade el estado de "confirmación anticipada" a las reservas con check-in.
+  [QAW-11436] | v18.7.2] - (08/08/2023 | Corrección mensaje de cancelación de reservaciones.
+  [QAW-10845] | v17.8.0] - (10/07/2023 | Se arregla filtro de fechas para exportación de datos en formularios de reserva.
+  [QAW-10077] | v17.6.0] - (07/06/2023 | Se corrige edición de reservas el cual generaba error de reserva simultanea, ya que se tenia en cuenta la reserva editada en la validación.
+  [QAW-10349] | v17.3.15] - (25/05/2023 | Se corrige formato de fecha y hora en cabecera de importación de reservas.
+  [QAW-10346] | v17.3.15] - (25/05/2023 | Se corrigen distintos fallos como la paginación de la lista de reservas, el filtro de estado de formulario y error al cargar lista de reserva
+  [QAW-10288] | v17.3.15] - (25/05/2023 | Se corrige error en formularios de reservas que no deja guardar observaciones.
+  [QAW-9448] | v17.3.15] - (25/05/2023 | Se corrige error cuando se intenta reservar una sala para un usuario que no pertenece a la copropiedad.
+  [QAW-9567] | v17.3.15] - (25/05/2023 | Se corrige error en selección de puestos (navegador safari en iOS)
+  [QAW-10304] | v17.3.3] - (17/05/2023 | Se corrige la fecha por defecto al momento de cargar la lista de reservaciones.
+  [QAW-10286] | v17.3.2] - (16/05/2023 | Ajuste del "nullability operator" al obtener el nombre de la copropiedad en la exportación de reservaciones.
+  [QAW-10248] | v17.1.4] - (09/05/2023 | Se remueve el hook que llama a la ruta /reservations en el componente notifications-handler el- [ cual era usado en todas las vistas.
+  [QAW-10127] | v17.1.3] - (04/05/2023 | Se corrige acceso multiple en areas de trabajo con mismo qr, sin reserva activa.
+  [QAW-100052] | v17.0.0] - (28/04/2023 | Se corrige el error de mostrar la fecha en lista de reservaciones para Safari
+  [QAW-9679] | v16.6.6] - (11/04/2023 | Se ajusta la relación entre reserva y usuario, para que cuando este se desactive, lo consulte de igual manera y no genere errores en el listado de reservas.
+  [QAW-9579] | v16.6.5] - (29/03/2023 | Se ajusta la cancelación de reservas recurrentes. También se cancela la reserva actual cuando está en progreso.
+  [QAW-9281] | v16.6.5] - (29/03/2023 | Se corrige filtro de empresas en reservaciones ya que estaba filtrando por las empresas de las zonas y no la de los usuarios.
+  [QAW-9303] | v16.6.5] - (29/03/2023 | Se corrige error al intentar liberar puesto / sala.
+  [QAW-7917] | v16.6.5] - (29/03/2023 | Se corrige que en el acceso manual no se de acceso a zonas que sean Locker o Puestos.
+  [QAW-9503] | v16.6.0] - (27/03/2023 | Ajuste de cantidades en los gráficos de reservas por estado en métrica de salas y puestos.
+  [QAW-9505] | v16.6.0] - (27/03/2023 | Se corrige la métrica de ocupación tanto en el resumen de salas como en el resumen de áreas de trabajo.
+  [QAW-9615] | v16.6.0] - (27/03/2023 | Ajuste cálculo de porcentaje de incremento en métricas de reservas activas (salas y puestos).
+  [QAW-7921] | v16.1.8] - (06/02/2023 | Se corrige el error de que las salas aparecen sin copropiedad
+  [QAW-8794] | v16.1.8] - (06/02/2023 | Se condiciona verificacion de zona reservable en la funcion que notifica cambios de reserva, para evitar error de acceso al objeto cuando es nulo.
+  [QAW-9229] | v16.1.8] - (06/02/2023 | Se agrega fecha de creación de la reserva en el modal de detalles.
+  [QAW-9264] | v16.1.8] - (06/02/2023 | Se corrige el mal comportamiento del desactiva boton en modal de puestos.
+  [QAW-9373] | v16.1.8] - (06/02/2023 | Se corrige el responsive del modal de cancelacion de reservas masivas.
+  [QAW-8972] | v16.1.0] - (24/01/2023 | Se corrige el número mostrado de elementos a exportar en reservas.
+  [QAW-8973] | v16.0.1] - (03/01/2023 | Se corrige el botón de cancelación de reservas, no se reseteaba al cancelar la primera vez
+  [QAW-8975] | v16.0.1] - (03/01/2023 | Se añade label para input de fecha en modal de cancelación de reservas
+  [QAW-8974] | v16.0.1] - (03/01/2023 | Se añaden los estados de cancelación para visualizarlos en el badge de reservaciones
+  [QAW-9119] | v16.0.1] - (03/01/2023 | Se Corrigue width del filtro estado de la reserva en reservaciones, cambiados labels por unos más acordes con sus respectivos colores.
+  [QAW-7921] | v16.0.0] - (03/01/2023 | Se corrige el error de que las salas aparecen sin copropiedad.
+  [QAW-8767] | v15.2.6] - (15/12/2022 | Se soluciona problema al cargar el perfil cuando el rol del usuario autenticado es coordiandor de reservas masivas.
+  [QAW-7592] | v15.2.6] - (15/12/2022 | Se corrige en reservaciones, que se muestren solo los usuarios que puede ver el usuario en sesión.
+  [QAW-8696] | v15.2.1] - (9/12/2022 | Se agrega permiso al coordinador para listar solo las reservas de usuarios que tengan la o las mismas empresas
+  [QAW-8581] | v15.1.7] - (28/11/2022 | Se muestran las acciones de reservas por cada uno de los roles de la aplicación.
+  [QAW-7969] | v15.0.2] - (04/11/2022 | Se corrige importacion de reservas masivas para que sea compatible con el loadbalancer del servidor.
+  [QAW-7811] | v15.0.2] - (04/11/2022 | Se corrige en la notificación push de 15 minutos antes cuando una reserva tiene check-in de un usuario, la reciben varios usuarios y debería recibirla sólo el usuario en sesión
+  [QAW-7341] | v15.0.0] - (02/11/2022 | Se corrige el error al editar areas de trabajo con gran cantidad de puestos.
+  [QAW-7460] | v15.0.0] - (02/11/2022 | Ahora se muestra correctamente la fecha de creación de la reserva en el modal 'Ver mas' de las reservaciones.
+  [QAW-7749] | v13.0.3] - (12/10/2022 | Se corrije parametro en ruta api de creacion de reserva de puestos, se cambia el parametro id por spaceId, para resolver conflicto de validación. Adicionalmente se corrije error en notificacion al cancelar reservas recurrentes de salas.
+  [QAW-7228] | v13.0.0] -(04/10/2022 | Se soluciona bug al intentar comentar la cancelacion de una reserva desde el modal de informacion.
+  [QAW-7443] | v13.0.0] -(04/10/2022 | Se corrigen notificaciones en reservas masivas, se habilita flujo para convertir reserva individual en recurrente.
+  [QAW-7278] | v13.0.0] -(04/10/2022 | Se corrige bug en edicion individual de la reserva de puestos.
+  [QAW-7436] | v13.0.0] -(04/10/2022 | Se corrige que al editar reservas masivas de puestos se eliminen las reservas de los puestos que sean deseleccionados.
+  [QAW-7315] | v13.0.0] -(04/10/2022 | Se corrige asunto en correo de notificacion de edicion de reserva de puestos individual.
+  [QAW-7280] | v13.0.0] -(04/10/2022 | Se corrige notificación de edicion de reserva individual la cual se estaba emitiendo duplicada.
+  [QAW-7285] | v13.0.0] -(04/10/2022 | Se corrige el error que no permitía editar una reserva masiva de puestos.
+  [QAW-7229] | v12.1.0] - (26/08/2022 | Se corrige cancelación de reservas desde Api, aplicando la politica canCancelReservation
+  [QAW-6588] | v9.0.1] - (28/06/2022 | Se validan los permisos al crear reservas de puestos y salas.
+  [QAW-6522] | v9.0.0] - (23/06/2022 | Se corrige liberacion de reservas para que no permita liberar una reserva que no ha comenzado.
+  [QAW-6512] | v9.0.0] - (23/06/2022 | Se corrige comando que actualiza los estados de las reservas, para que no elimine las reservas finalizadas, y se optimiza la query.
+  [QAW-5985] | v8.7.5] - (26/05/2022 | Se agrega permiso y validación para cancelar reserva. Solo el usuario
+  [QAW-5493] | v8.3.0] - (27/04/2022 | Se agrega metodo de busqueda por nombre de zona en selector de puestos de trabajo en modulo de reservaciones
+  [QAW-5973] | v8.3.0] - (27/04/2022 | Se corrige el mensaje de resumen en el modal de reserva de puestos cuando no hay recurrencia.
+  [QAW-5875] | v8.2.0] - (22/04/2022 | Se corrige la actualización de posiciones de puestos en el mapa de areas de trabajo.
+  [QAW-5398] | v8.0.6] - (12/04/2022 | Se corrige selector de filtro de puestos en reservaciones.
+  [QAW-5852] | v8.0.6] - (12/04/2022 | Se valida el check-in de la reserva para mostrar correctamente el status en la app
+  [QAW-5489] | v7.0.0] - (15/03/2022 | Se corrige error cuando el usuario intenta cambiar la hora de la reserva con las flechas del teclado, en reserva de salas.
+  [QAW-4732] | v7.0.0] - (15/03/2022 | Se corrige el error en los inputs del modal en reserva de salas.
+  [QAW-5411] | v6.3.0] - (8/03/2022 | Se corrige el zoom maximo en los mapas de puestos
+  [QAW-4857] | v6.2.0] - (1/03/2022 | Se corrigen los filtros del módulo de reservaciones
+  [QAW-5364] | v6.2.0] - (1/03/2022 | Se corrige problema al seleccionar puestos en el webview
+  [QAW-5023] | v5.4.0] - (18/02/2022 | En reserva de puestos mostrar todas las areas aunque no tengan puestos disponibles.
+  [QAW-4777] | v5.3.0] - (13/01/2022 | Se corrije reporte de reservaciones donde no se mostraba usuario si este habia sido eliminado.
+  [QAW-4738] | v5.3.0] - (13/01/2022 | se corrigue error al desplegar detalle en lista de reservas para puestos de trabajo.
+  [QAW-4728] | v5.3.0] - (13/01/2022 | Se corrigue problema de timeout en creacion y cancelacion de reserva.
+  [QAW-4539] | v5.0.0] - (20/12/2021 | Se corrige envío de correo a invitados en reservacion de salas, adicionalmente se corrige bug en campo de titulo y descripcion al confirmar reserva.
+  [QAW-4243] | v4.7.0] - (13/12/2021 | Se cambia carpeta temporal de archivo de exportacion en formularios personalizados, historial de accesos y reservaciones
+  [QAW-3987] | v4.3.0] - (03/11/2021 | Se corrige bug al dar click a un puesto trabajo sin qr.
+  [QAW-3547] | v4.0.5] - (22/10/2021 | Se corrige visualizacion de qr asociado al puesto de trabajo en el modulo de area de trabajo.
+  [QAW-3550] | v4.0.5] - (22/10/2021 | Se corrige que al eliminar puesto desde el módulo de áreas de trabajo, esa zona se conserve en la copropiedad.
+  [QAW-3852] | v4.0.5] - (22/10/2021 | Se corrige bug que eliminaba qr de entrada de todas las puertas asociadas a los puestos al editar un area de trabajo.
+  [QAW-3710] | v4.0.0] - (20/10/2021 | Se habilita busqueda por nombre de usuario en modulo de reservaciones.
+  [QAW-3564] | v3.0.9] - (27/09/2021 | Se arregla error al cargar lista de salas provocado por conexion mqtt.
+  [QAW-3556] | v3.0.8] - (24/09/2021 | Se agrega protocolo mqtt en el listado de Disponibilidad de Salas.
+  [QAW-3219] | v3.0.8] - (24/09/2021 | Se corrige parametro antipassback para que no se guarde de forma predeterminada en la creacion de puestos de trabajo desde el modulo de areas de trabajo
+  [QAW-3053] | v2.9.0] - (13/09/2021 | Se corrige el mensaje de error al enviar una reserva de puestos con una fecha menor a la actual.
+  [QAW-3064] | v2.4.1] - (26/08/2021 | Se corrige la visualización de reservaciones de salas y puestos solo cuando el usuario tiene el
+  [QAW-1506] | v1.6.0] - (13/01/2021 | Se arregla modal de ver mas en lista de reservaciones. Solo aparecia la primer
+
+
+================================================================================
+MÓDULO: VISITANTES Y AUTORIZACIONES
+Total de bugs históricos: 67
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Fallos al anunciar visitante desde autorización pre-registrada
+  • Errores al editar autorización (comentario, empresa, copropiedad)
+  • Restricción de acceso único aplicada de forma global en lugar de por tarjeta
+  • Problemas al buscar visitante cuyo creador fue eliminado
+  • Errores al guardar vehículos en el anuncio de visitantes
+  • Compresión incorrecta de imágenes de avatar
+  • Fallos en importación de visitantes con usuarios o copropiedades múltiples
+  • Validación de hora de entrada/salida diaria no funcionando correctamente
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [76] | 28.1.3] - (25/02/2026 | Se corrige error al comprimir imágenes de avatar para usuarios y visitantes, para que se compriman correctamente.
+  [45] | 28.0.1] - (28/01/2026 | Se ajusta correo de autorización de acceso para que se muestre el botón de acceso y se agregue la política de tratamiento de datos.
+  [RT-I1158] | 27.6.1] - (19/12-2025 | Se corrige el error al obtener la ubicación del usuario en la camara de visitantes.
+  [RT-I1041] | 27.4.2] - (19/11-2025 | Se corrige el error al buscar un visitante con usuario que lo creo eliminado.
+  [QIOT] | 27.4.1] - (06/11/2025 | Se corrigue busqueda rfid por usuarios para validacion en creacion y actualizacion de autorizacion, tambien se ajuste la busqueda de usuario por rfid en el historial de accesos.
+  [RT-I525] | 26.22.6] - (16/07/2025 | Se ajusta la relación entre autorizaciones y empresas eliminadas.
+  [RT-I389] | 26.21.2] - (24/06/2025 | Se corrige el fallo al guardar vehículos en el anuncio de visitantes.
+  [MAN-I56] | v26.14.0] - (29/04/2025 | Se corrige el diseño de la modal de información de autorizaciones.
+  [DPC-I64] | v26.8.2] - (06/02/2025 | Se corrige el fallo al anunciar un visitante desde la autorizacion pre registrada.
+  [DPC-I12] | v26.6.2] - (16/01/2025 | se envia evento de eliminacion facial cuando el visitante accede y tiene acceso unico.
+  [QIOT] | v26.3.6] - (13/11/2024 | Se corrige error de sincronización de eventos en importacion de visitantes.
+  [QUEOA-446] | v26.3.4] - (25/10/2024 | Se corrige carga en importacion de usuarios y visitantes agregando colas a los procesos subyacentes de sincronizacion en la importacion.
+  [QUEOA-420] | v26.3.1] - (17/10/2024 | Se corrige el selector de grupos de puertas en la creación de autorizaciones para visitantes.
+  [QUEOA-340] | v26.3.0] - (15/10/2024 | Se corrige y actualizar lógica de validador de hora en la importación de visitantes.
+  [QIOT] | v26.1.2] - (27/09/2024 | Se corrige error de sincronización de eventos en importacion de visitantes.
+  [QUEOA-176] | v25.1.0] - (23/08/2024 | Se corrige que al editar una autorización de visitante, no se edita el comentario de la misma y se ajusta el selector de empresas en importar visitantes, para que solo liste las empresas activas del usuario .
+  [QUEOA-200] | v25.1.0] - (23/08/2024 | Se ajusta comportamiento al recargar la página en modo enfoque de visitantes.
+  [QUEOA-175] | v24.2.1] - (20/08/2024 | Se corrige que se asocie la copropiedad correcta en la importaciÃ³n de visitantes cuando un usuario tiene mÃ¡s de 1 copropiedad.
+  [QUEOA-158] | v24.1.1] - (14/08/2024 | Se añade check de aceptar políticas de tratamientos de datos en correo de autorización de visitante.
+  [QAW-15571] | v23.1.0] - (15/07/2024 | Ajustes en caso de uso para acompañante de visitante.
+  [QAW-15419] | v22.5.0] - (21/06/2024 | Correo de autorización que se genera toma cualquier copropiedad cuando la empresa pertenece a n copropiedades.
+  [QAW-15431] | v22.5.0] - (21/06/2024 | Ajuste en las autorizaciones cuando se hacen dentro del mismo modal 2 copropiedades, misma empresa.
+  [QAW-15418] | v22.5.0] - (21/06/2024 | La restricción de acceso único se está haciendo de forma general y no por tarjeta de autorización.
+  [QAW-15423] | v22.5.0] - (21/06/2024 | Modificar la columna "Última autorización vigente" en el modo lista, por "Última autorización".
+  [QAW-15367] | v22.4.0] - (13/06/2024 | Ajuste formato de hora inicial y final en importación de visitantes.
+  [QAW-15163] | v22.1.0] - (29/05/2024 | Mejoras de salida post visitantes.
+  [QAW-14401] | v22.0.2] - (27/04/2024 | Se corrige que al eliminar vehículo de los datos básicos de un visitante, se elimine también del listado de vehículos.
+  [QAW-13885] | v20.7.2] - (22/01/2024 | Se corrige error de ingreso de un visitante que previamente fue usuario y se le desactivaron las empresas (en MQTT).
+  [QAW-13625] | v20.7.2] - (22/01/2024 | Se corrige error de ingreso de un visitante que previamente fue usuario y se le desactivaron las empresas.
+  [QAW-13532] | v20.5.1] - (22/12/2023 | Se corrige edición de visitantes por parte de coordinadores y property owner, para que no se pierdan las copropiedades seleccionadas, al editar el registro.
+  [QAW-12516] | v19.2.2] - (19/10/2023 | Se corrige error el cual no permitía asignar copropiedades a los visitantes importados como company.reception.
+  [QAW-11152] | v17.8.2] - (13/07/2023 | Se revierte la eliminación de validación por copropiedad en command mqtt person trait, la cual generaba error de acceso a los visitantes.
+  [QAW-10320] | v17.3.4] - (18/05/2023 | Se agrega botón para limpiar rango de fechas, se corrige la fecha por defecto en lista de visitantes y se aplican ajustes de UI
+  [QAW-10301] | v17.3.3] - (17/05/2023 | Se corrige la posición del botón elipsis en la lista de visitantes
+  [QAW-10083] | v17.1.3] - (04/05/2023 | Se corrige el mensaje al actualizar visitantes mediante un rol property owner.
+  [QAW-9648] | v17.1.1] - (02/05/2023 | Corrección del nombre de variable del código QR para acceso de visitantes.
+  [QAW-10072] | v17.0.0] - (28/04/2023 | Se corrige error en la creación y edición de visitantes al momento de asignarle la hora de entrada y salida.
+  [QAW-9349] | v16.4.2] - (07/03/2023 | Se corrige query de metrica de acceso de usuarios y visitantes, para que valide por la coporpiedad del acceso y no por las del usuario o visitante
+  [QAW-9251] | v16.1.8] - (06/02/2023 | Se corrige edicion de vehiculo tipo bicicleta en modulo de visitantes.
+  [QAW-5604] | v8.0.6] - (12/04/2022 | Se corrige el filtrado de visitantes para rol coordinador.
+  [QAW-5601] | v8.0.0] - (25/03/2022 | Se corrige filtro de empresas del dashboard para que la información del ingresos de visitantes que filtre por la empresa del visitante.
+  [QAW-4651] | v7.3.0] - (30/03/2022 | Se corrige edicion en modulo de vehiculos el cual estaba fallando en la asignacion al visitante.
+  [QAW-4397] | v4.7.3] - (17/12/2021 | Se corrige flujo de salida manual en visitantes el cual no estaba limpiando los registros de las zonas donde el visitante había ingresado.
+  [QAW-4411] | v4.7.3] - (17/12/2021 | Se refactoriza el módulo de acceso por QR para visitantes, de tal forma que el error de la cámara en blanco no suceda.
+  [QAW-4414] | v4.7.3] - (17/12/2021 | Se modifica el formulario de visitantes, de tal manera que el campo de apellido quede en primer lugar, para facilitar la integración con las cámaras que escanean cédulas.
+  [QAW-4312] | v4.7.0] - (13/12/2021 | Se inhabilita envío de sms a visitantes.
+  [QAW-3990] | v4.4.9] - (25/11/2021 | Se corrige la validación de permiso en el navegador Safari, cuando el visitante va a acceder por QR.
+  [QAW-4203] | v4.4.9] - (25/11/2021 | Se corrige bug que se producia cuando un visitante intentaba acceder digitando el codigo qr.
+  [QAW-3898] | v4.3.0] - (03/11/2021 | Ahora los coordinadores pueden ver los vehículos de visitantes de sus empresas o copropiedades, respectivamente.
+  [QAW-3127] | v3.0.8] - (24/09/2021 | Se corrige que al editar los grupos de puertas de un visitante, en la visualización de grupo de puertas, aparezcan solo las puertas permitidas.
+  [QAW-3218] | v3.0.8] - (24/09/2021 | Se corrige que no aparecían los vehículos de visitante, así como también la asignación de vehículo principal en el formulario de usuarios y visitantes.
+  [QAW-2926] | v2.0.9] - (11/08/2021 | Se corrige que el rol recepcionista pueda visualizar la información de acceso de los visitantes.
+  [QAW-1892] | v2.0.9] - (11/08/2021 | Se valida en la importación de usuarios y visitantes la extension del archivo la cual debe ser
+  [QAW-2856] | v2.0.9] - (11/08/2021 | Se muestran las copropiedades del usuario autenticado en el selector de copropiedades del modulo visitantes.
+  [QAW-2938] | v2.0.9] - (11/08/2021 | Se corrige el filtro del selector de grupos de puertas y puertas en formulario de visitante para el rol recepcionista.
+  [QAW-2853] | v2.0.5] - (05/08/2021 | Se corrige query que filtraba visitantes dentro y fuera de la copropiedad para rol Centro de Control.
+  [QAW-2426] | v2.0.5] - (05/08/2021 | Se corrige que cuando un usuario visitante no tiene horario establecido, no pueda ingresar libremente.
+  [QAW-2315] | v2.0.0] - (14/07/2021 | Se mejora validación de correo tanto en la importación tanto de usuarios como de visitantes para impedir un doble "." en el email.
+  [QAW-1828] | v1.13.0] - (31/03/2021 | Se filtran las copropiedades que se le agregan a los visitantes
+  [QAW-1749] | v1.12.0] - (17/03/2021 | La importación de visitantes es corregida cambiando el flujo, ahora se sube el Excel, se verifican los visitantes y luego al momento de importarlos se pasa la importación a una cola de trabajo y al terminar se envía un email al solicitante de la importación para que pueda ir al listado a confirmar.
+  [QAW-1723] | v1.11.0] - (02/03/2021 | Se corrige que el formulario de visitantes permita fecha de ingreso anteriores a la actual.
+  [QAW-1649] | v1.8.0] - (17/02/2021 | Se arregla que el acceso por cédula de visitante tomaba el registro más antiguo, ahora toma el más reciente.
+  [QAW-1597] | v1.7.0] - (02/02/2021 | Se cambia manejo de errores al crear/editar usuario y visitante.
+  [QAW-1485] | v1.7.0] - (02/02/2021 | Se corrigen los comentarios de visitantes que dicen null.
+  [QAW-1568] | v1.6.0] - (13/01/2021 | Se arregla validación de horario en visitantes (sistema antiguo).
+  [QAW-1513] | v1.6.0] - (13/01/2021 | Se corrige la seleccion de puertas en la seccion de visitantes
+  [QAW-1526] | v1.6.0] - (13/01/2021 | Acceso por QR para visitante utilizando el sistema de puertas.
+
+
+================================================================================
+MÓDULO: CONFIGURACIÓN, ROLES Y OTROS
+Total de bugs históricos: 63
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Permisos de rutas faltantes para ciertos roles
+  • Roles específicos (coordinator.solfunza, company.reception) con acceso incorrecto a módulos
+  • Bloqueo de importación en status 5
+  • Errores de carga en zonas con aforo
+  • Scripts de terceros (Frigade) no cargan correctamente en toda la app
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [QIOT] | 27.4.0.1] - (05/11/2025 | Se reestablece el package-lock.
+  [RT-I934] | 27.2.3] - (14/10/2025 | Se corrige creación de incidencias en la integración con sisteplus, asegurando que solo se envien incidencias cuando existan elementos con novedad reportado.
+  [RT-I530] | 26.23.1] - (24/07/2025 | Se corrige la ubicación de los scripts de Frigrade para que se carguen correctamente en el resto de la aplicación.
+  [RT-I493] | 26.22.4] - (10/07/2025 | Se añaden variables de entorno que permitan ajustar los parámetros de horizon.
+  [MAN-I59] | v26.14.0] - (29/04/2025 | Se agrega el rol de recepción de compañías para property owners.
+  [QUEOA-430] | v26.3.3] - (23/10/2024 | Se corrige error de carga en zonas con aforo, optimizando el objeto de respueesta.
+  [QUEOA-197] | v24.2.2] - (21/08/2024 | Se hace correción en la función de restaurar por rol Administrador.
+  [QAW-15239] | v22.2.1] - (04/06/2024 | Ajuste en rol coordinador 100 street
+  [QAW-12544] | v20.0.1] - (21/11/2023 | Se corrigen tests que fallaban ocasionalmente.
+  [QAW-12938] | v20.0.1] - (21/11/2023 | Se corrige error en sistemas operativos de televisores de la versión 20.0.0.
+  [QAW-12176] | v19.3.5] - (23/10/2023 | [QAW-12077] Se ajusta el comportamiento de la inactivación masiva dependiendo del rol.
+  [QAW-12337] | v19.2.0] - (10/10/2023 | Se corrige la restauración de recepcionistas como control center.
+  [QAW-11897] | v19.0.1] - (11/09/2023 | Se corrige el error al navegar en la version 19.0.0.
+  [QAW-11953] | v19.0.0] - (01/09/2023 | Se Corrige hook de useFecth que estaba ocasionando múltiples errores
+  [QAW-11433] | v18.7.2] - (08/08/2023 | Ya no se ve el modal de eliminación cuando se cierra el modal de restauración.
+  [QAW-11399] | v18.7.2] - (08/08/2023 | Reemplazadas palabras "inactivar" por "Desactivar".
+  [QAW-9685] | v17.8.0] - (10/07/2023 | Se ajusta para que al eliminar un área de trabajo ya no salga error desconocido.
+  [QAW-10245] | v17.6.0] - (07/06/2023 | Se corrige que al editar un locker ocupado, su estado cambiaba a disponible.
+  [QAW-10246] | v17.6.0] - (07/06/2023 | Se actualiza la creación y edición de zonas. Ahora el dispositivo indicador de bloqueo no es requerido para crear un locker.
+  [QAW-10082] | v17.1.3] - (04/05/2023 | Se corrigen las redirecciones después de crear o editar un dispositivo.
+  [QAW-10075] | v17.0.0] - (28/04/2023 | Se corrige vista de edición de áreas de trabajo.
+  [QAW-9708] | v17.0.0] - (28/04/2023 | Se corrige estilo modal sweet alert como la versión anterior
+  [QAW-100051] | v17.0.0] - (28/04/2023 | Se corrige múltiples errores al cargar vistal y modales gracias a las fechas para safari
+  [QAW-9704] | v17.0.0] - (28/04/2023 | Se corrige error de mix en rooms/dashboard.
+  [QAW-9375] | v16.1.8] - (06/02/2023 | Se corrigen los periodos de tiempo en las metricas de áreas de trabajo y porcentajes de métricas
+  [QAW-9250] | v16.1.8] - (06/02/2023 | Se modifica número de teléfono de soporte en el sitio web.
+  [QAW-8675] | v16.0.1] - (03/01/2023 | Se corrige el modal en móvil ya que se salía del viewport del dispositivo
+  [QAW-8878] | v16.0.1] - (03/01/2023 | Se corrige el error de los filtros de fecha para el resumen de control de acceso en el navegador Safari.
+  [QAW-8903] | v16.0.0] - (03/01/2023 | Se corrige el metodo fetch del hook useFetch.
+  [QAW-8755] | v15.2.6] - (15/12/2022 | Se establece permiso para modificar mis datos personales.
+  [QAW-8660] | v15.2.0] - (7/12/2022 | Se muestra la lista de áreas de trabajo para roles diferentes a property owner, employee, coordinador y admin.
+  [QAW-6880] | v11.0.1] - (26/07/2022 | Se arregla problema con la recarga en tiempo real del listado de areas de trabajo.
+  [QAW-5412] | v9.0.8] - (06/07/2022 | Se mejora la pantalla de grupos para resoluciones inferiores a 1200px.
+  [QAW-5374] | v8.8.0] - (06/06/2022 | Se agrega flujo de autenticación para vincular cuenta de google o microsoft desde mobile.
+  [QAW-5969] | v8.2.0] - (22/04/2022 | Se corrige el modal al abrirlo desde un employee.
+  [QAW-5535] | v8.0.6] - (12/04/2022 | Se corrige problema al intentar modificar un area de trabajo con mas de 160 espacios.
+  [QAW-5563] | v8.0.6] - (12/04/2022 | Se corrige error al consultar areas de trabajo cuando un espacio de trabajo no posee zona.
+  [QAW-5580] | v7.3.0] - (30/03/2022 | Se corrige el zoom inicial de los mapas.
+  [QAW-5491] | v7.0.3] - (17/03/2022 | Se corrige problema al representar el estado de pendiente en el mapa de espacios de trabajo.
+  [QAW-5491] | v7.0.3] - (17/03/2022 | Se corrige problema al representar el estado de pendiente en el mapa de espacios de trabajo.
+  [QAW-4519] | v5.0.0] - (20/12/2021 | Se corrige link de botón de soporte.
+  [QAW-4254] | v4.7.0] - (13/12/2021 | Se inhabilita comando visitor:notification en el kernel por sobrecostos de envio
+  [QAW-4398] | v4.6.1] - (13/12/2021 | Se corrige error al cargar mapa de espacios de trabajo.
+  [QAW-4166] | v4.4.9] - (25/11/2021 | Se corrige filtro company_id en TrackActivity, el cual estaba como copmany_id
+  [QAW-3900] | v4.0.5] - (22/10/2021 | Se corrige problema de tiempo real en espacios de trabajo.
+  [QAW-3902] | v4.0.5] - (22/10/2021 | Se revierten ajustes de la QAW-3854.
+  [QAW-3158] | v4.0.0] - (20/10/2021 | Se coloca propiedad platform-check con valor false en composer.json para corregir fallo en entornos de prueba.
+  [QAW-3152] | v2.9.0] - (13/09/2021 | Se cambia la ruta de consulta de roles, para el uso de property owner, admin y coordinator.
+  [QAW-2300] | v2.0.0] - (14/07/2021 | Solucionar problemas de websockets en producción.
+  [QAW-2549] | v2.0.0] - (14/07/2021 | Se soluciona bug al intentar recuperar contraseña desde la plataforma, teniendo un intento previo desde la aplicacion mobile con codigo expirado.
+  [QAW-2549] | v2.0.0] - (14/07/2021 | Se soluciona bug al intentar recuperar contraseña desde la plataforma, teniendo un intento previo desde la aplicacion mobile con codigo expirado.
+  [QAW-2372] | v1.16.6] - (01/06/2021 | Se corrige un error en el mapa de areas de trabajo que no permitía cargar bien el mapa al actualizar la vista.
+  [QAW-1831] | v1.16.0] - (03/05/2021 | Se arregla el problema en que el menú en las listas del admin se
+  [QAW-1720] | v1.16.0] - (03/05/2021 | Se agrega verificación del permiso de asignar locker al asignar un
+  [QAW-2228] | v1.15.2] - (13/05/2021 | Se corrige el link del botón "Deseo más información" de las páginas de spaces.
+  [QAW-2045] | v1.15.0] - (15/04/2021 | Se corrige bug en listado de actividades cuando las fechas aún no han sido seleccionadas.
+  [QAW-1829] | v1.14.0] - (08/04/2021 | Se arregla el manejo del caso en que la fecha de nacimiento está
+  [QAW-1570] | v1.8.0] - (17/02/2021 | Se arregla busqueda en selector de corpropiedad en vista de
+  [QM-278] | v1.7.1] - (04/02/2021 | Se arregla problema en mobile en que se mostraban todos los
+  [QAW-1567] | v1.7.0] - (02/02/2021 | Se arregla que ahora en el tab de zonas solo muestra las
+  [QAW-1546] | v1.6.0] - (13/01/2021 | Corrección del selector de zonas.
+  [QAW-1564] | v1.6.0] - (13/01/2021 | Corrección del selector de zonas, ya la QAW-1546 corrige esta Story.
+  [QAW-1498] | v1.6.0] - (13/01/2021 | Se muestran mesajes detallados cuando sucede un error de validación
+
+
+================================================================================
+MÓDULO: USUARIOS E IMPORTACIÓN
+Total de bugs históricos: 61
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Importación falla con usuarios inactivos, duplicados o sin vehículo
+  • Campos personalizados no se muestran al editar usuario con copropiedad
+  • Horarios de empresa no se asignan al importar por Excel
+  • Errores de permisos de puertas y grupos en importación
+  • Usuarios con copropiedad incorrecta al importar con múltiples copropiedades
+  • Botones deshabilitados incorrectamente en importación por Excel
+  • Eliminación de empresas de usuarios al editar por otro rol
+  • Validación de RFID en importación no funciona correctamente
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [46] | 28.0.3] - (03/02/2026 | Se corrige error que al editar un usuario con copropiedad con campos personalizados, no se mostraban las respuestas del usuario.
+  [RT-I349] | 26.22.4] - (10/07/2025 | Se arregla validación de empresas para usuarios y coordinadores con multiples empresas en aforo.
+  [RT-I271] | 26.21.1] - (12/06/2025 | Se agrega el rol coordinator.solfunza para que no pueda ver modulo de usuarios
+  [RT-I235] | 26.16.1] - (21/05/2025 | Se agrega verificación de fecha de creación de usuarios en el comando de eliminación.
+  [Man-I58] | v26.14.0] - (29/04/2025 | Se añade los horarios de la empresa seleccionada a usuarios importados por excel.
+  [MDP-I200] | v26.14.0] - (29/04/2025 | Se corrige el fallo al importar usuarios donde el archivo contiene usuarios con y sin vehículos.
+  [MDP-I155] | v26.10.1] - (11/03/2025 | Se corrige el fallo al importar usuarios donde ya existen en una copropiedad distinta.
+  [MDP-I128] | v26.8.2] - (06/02/2025 | Se corrige el fallo al guardar horarios de usuarios importados por excel.
+  [QUEOA-442] | v26.3.5] - (29/10/2024 | Se corrige bug que evitaba que un usuario se reactivara correctamente desde el DA, si este habia sido reactivado previamente desde la plataforma.
+  [QUEOA-425] | v26.3.2] - (21/10/2024 | Se soluciona bloqueo causado por importación en status 5.
+  [QUEOA-79] | v25.1.2] - (09/09/2024 | Se corrige que al editar un usuario se muestren copropiedades que no le corresponden al usuario en sesión.
+  [QAW-13270] | v20.7.3] - (29/01/2024 | Se corrige la eliminación de empresas de usuarios al ser editados por alguien que no pertenece a las mismas.
+  [QAW-13070] | v20.1.1] - (04/12/2023 | Se corrige error en importación de usuarios, el cual se presentaba en la verificación al intentar importar un usuario con vehículo existente sin color.
+  [QAW-13070] | v20.0.1] - (21/11/2023 | (front): Se añade Alert de warning por si llega a haber error de back en importación de usuarios por excel
+  [QAW-11814] | v19.3.5] - (23/10/2023 | Se corrige error con inactivación masiva de usuarios.
+  [QAW-11506] | v18.8.6] - (29/08/2023 | Al editar un usuario, se conservan las empresas desactivadas previamente.
+  [QAW-11710] | v18.8.6] - (29/08/2023 | Ajuste duplicidad de copropiedades al editar usuario como coordinador.
+  [QAW-9435] | v18.7.2] - (08/08/2023 | Se corrige comportamiento al mostrar los usuarios desactivados por copropiedad y empresa.
+  [QAW-11417] | v18.7.2] - (08/08/2023 | Filtro de empresas y copropiedades en los detalles del usuario dependiendo del rol.
+  [QAW-11437] | v18.7.2] - (08/08/2023 | Reactivación de usuario en copropiedades y empresas al editarlo.
+  [QAW-8899] | v17.3.15] - (25/05/2023 | Se corrige la visualización del avatar del usuario en el modal de detalle.
+  [QAW-10071] | v17.0.0] - (28/04/2023 | Se corrige error al momento de remover una restricción de un usuario en formularios.
+  [QAW-10043] | v17.0.0] - (28/04/2023 | Se corrige el datepicker en la vista de importar usuario desde excel
+  [QAW-9856] | v17.0.0] - (28/04/2023 | Se corrige autenticacion con google o microsoft por error con libreria de jwt al validar el token del usuario.
+  [QAW-7753] | v16.6.5] - (29/03/2023 | Al exportar usuarios, se filtran con base en las empresas del usuario en sesión.
+  [QAW-8962] | v16.4.0] - (03/03/2023 | Se corrige que se muestre el listado de actividades para usuario que no sea admin.
+  [QAW-8795] | v15.2.6] - (15/12/2022 | Se soluciona problema al notificar cambios en aforo por empresas cuando el usuario tiene mas de una empresa asociada.
+  [QAW-8697] | v15.2.6] - (15/12/2022 | Se aplica el permiso de leer copropiedad para aplicar filtrado segun las copropopiedades del usuario en listado y selector de copropiedades.
+  [QAW-6964] | v15.1.7] - (28/11/2022 | Se muestran todas las empresas del usuario en el modal de perfil de usuario en mapa de área de trabajo
+  [QAW-7810] | v14.0.1] - (27/10/2022 | Se corrige selector de copropiedades y lista de empresas en modal de detalle de usuario.
+  [QAW-6593] | v9.0.8] - (06/07/2022 | Se cambia limite de paginacion en listado de usuarios de google de 100 a 10, para evitar restricción por limite de solicitudes por minuto de google.
+  [QAW-5413] | v9.0.8] - (06/07/2022 | Mejora de mensaje cuando no hay usuarios para importar.
+  [QAW-5415] | v9.0.8] - (06/07/2022 | Se añade estado de carga mientras se muestran los usuarios de un grupo, al expandirlo.
+  [QAW-6270] | v8.7.5] - (26/05/2022 | Se representa error adecuado en la edicion/creacion de usuarios al ingresar cedula o correo
+  [QAW-6263] | v8.7.5] - (26/05/2022 | Incluir todas las empresas asociadas a cada usuario en el archivo Excel de la exportación de usuarios.
+  [QAW-5830] | v8.7.5] - (26/05/2022 | Se muestran correctamente los mensajes de error en la creación o actualización del usuario.
+  [QAW-5998] | v8.4.2] - (10/05/2022 | Se permite listar usuarios para nuevos roles en scopeForUser.
+  [QAW-5488] | v8.3.0] - (27/04/2022 | Se modifica metodo de restauracion de usuarios por property owner, para que se reactive tambien en las empresas de las copropiedades.
+  [QAW-5502] | v7.0.2] - (16/03/2022 | El listado de vistantes es afectado por las empresas del usuario en sesion junto con las copropiedades.
+  [QAW-4668] | v7.0.0] - (15/03/2022 | Se agrega campo comentario y se genera flujo de envio de correo en importacion de usuarios para mensaje personalizado.
+  [QAW-4742] | v7.0.0] - (15/03/2022 | Se agrega detalle del usuario en table de verificacion para desactivacion masiva de usuarios.
+  [QAW-4476] | v4.7.3] - (17/12/2021 | Se corrige error al actualizar un usuario con una nuevo vehiclo de tipo bicicleta.
+  [QAW-4314] | v4.7.0] - (13/12/2021 | Se agrega validacion de empresa en el metodo de acceso para usuarios
+  [QAW-3996] | v4.4.9] - (25/11/2021 | Se agrega historial de actividades en importacion de usuarios.
+  [QAW-4038] | v4.4.9] - (25/11/2021 | Se corrige problema vehiculos duplicados en usuarios nuevos.
+  [QAW-3764] | v4.0.5] - (22/10/2021 | En importación de vistantes se agrega validación para evitar que fecha inicio sea mayor que fecha final.
+  [QAW-3858] | v4.0.5] - (22/10/2021 | Al importar usuarios, estos quedan con horario autorizado de 24/7.
+  [QAW-3191] | v3.0.8] - (24/09/2021 | Se arregla el formulario de salubridad, ahora aparecerá una vez por día, sin importar la hora que haya sido respondido.
+  [QAW-2930] | v2.0.9] - (11/08/2021 | Se corrige el botón desactivar usuario para rol Centro de Control.
+  [QAW-2410] | v2.0.5] - (05/08/2021 | Se corrige que como property owner y coordinador pueda desactivar usuarios sin que desactiven en copropiedades y empresas que no tengo asociadas.
+  [QAW-2492] | v1.17.0] - (29/06/2021 | Se corrigen datos de vehículo mostrados en el formulario de edición de usuario.
+  [QAW-2031] | v1.17.0] - (29/06/2021 | Se mejora la validación en el perfil del usuario en sesión para evitar colocar un email o dni en uso.
+  [QAW-2388] | v1.17.0] - (29/06/2021 | Se soluciona error al verificar archivo de importacion de usuarios con vehiculo.
+  [QAW-2326] | v1.16.6] - (01/06/2021 | Se representan los usuarios creados en la plataforma como usuarios sin cambio de contraseña,
+  [QAW-2365] | v1.16.6] - (01/06/2021 | En la importación de usuarios, se agrega acceso 24/7 y por cédula.
+  [QAW-2299] | v1.16.1] - (01/06/2021 | Se corrige el bug de error 500 al generar la contraseña de los usuarios.
+  [QAW-2262] | v1.16.0] - (03/05/2021 | Se corrige la búsqueda de vehiculos cuando el usuario no tiene teléfono asociado.
+  [QAW-1838] | v1.13.0] - (31/03/2021 | Se corrige que en la importación de usuarios no se pueda afectar los datos de uno existente pero que pertenezca a otra copropiedad.
+  [QAW-1728] | v1.11.0] - (02/03/2021 | Se corrige que al importar usuarios y se actualiza la información de usuarios existentes, se modifique la fecha de actualización de ese usuario.
+  [QAW-1651] | v1.8.0] - (17/02/2021 | Se corrige filtrado de áreas de trabajo, no estaba filtrando por las copropiedades del usuario.
+  [QAW-1499] | v1.6.0] - (13/01/2021 | Se arregla modal de ver mas en lista de usuarios. No aparecia el ultimo acceso
+
+
+================================================================================
+MÓDULO: CONTROL DE ACCESO (RFID / QR / FACIAL / LPR)
+Total de bugs históricos: 32
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Búsqueda RFID incorrecta en validación de autorizaciones
+  • Tarjetas RFID no se desactivan al eliminar/desactivar usuarios
+  • Errores al ingresar con cédula o RFID en puerta sin QR configurado
+  • Acceso manual no muestra siempre las opciones de puertas
+  • Problemas con acceso de visitante que previamente fue usuario
+  • Validación de listas restrictivas no aplicada en acceso manual
+  • Errores en acceso con pre-checkin en flujo MQTT
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [89] | 28.1.2] - (17/02/2026 | Se elimina la condición que validaba la última puerta de llegada y salida para mostrar siempre las opciones de puertas, sin importar si la solicitud de acceso manual es de entrada o de salida; esto permite seleccionar siempre la puerta en la solicitud de acceso manual.
+  [RT-I634] | 26.25.0] - (21/08/2025 | Se desactivan las tarjetas RFID al eliminar/desactivar usuarios.
+  [QIOT] | 26.24.9] - (14/08/2025 | Se arregla bug de sincronzacion cuando el usuario conserva acceso a puertas con copropiedad eliminada.
+  [RT-I506] | 26.22.5] - (15/07/2025 | Se corrige error en import de usuario respecto a permisos de puertas y grupos de puertas.
+  [RT-I506] | 26.22.5] - (15/07/2025 | Se corrige error en import de usuario respecto a permisos de puertas y grupos de puertas.
+  [RT-I410] | 26.22.1] - (27/06/2025 | Se corrige asignación de puertas a usuarios.
+  [I202] | 26.16.0] - (20/05/2025 | Se hace ajuste para que se envie correctamente la dirección al hacer acceso manual
+  [QAW-13655] | v20.6.1] - (28/12/2023 | Se ajusta validación del campo RFID en la importación de usuarios.
+  [QAW-13571] | v20.6.0] - (27/12/2023 | [QAW-13572] Corrección de búsqueda por RFID.
+  [QAW-10526] | v18.8.6] - (29/08/2023 | Se arregla filtro de puertas en gráficas de usuarios que sólo permitía ver 15 puertas.
+  [QAW-10251] | v18.7.2] - (08/08/2023 | Al desactivar o eliminar un usuario de una o varias copropiedades, se eliminan las puertas y grupos de puertas correspondientes.
+  [QAW-10811] | v17.8.2] - (13/07/2023 | Se restablece flujo de acceso por cédula o RFID
+  [QAW-9350] | v17.6.0] - (07/06/2023 | Propietarios y coordinadores sólo pueden gestionar puertas y grupos de puertas que comparten con el usuario en edición.
+  [QAW-10127] | v17.2.0] - (09/05/2023 | Se agregan tests de acceso a multiples areas de trabajo con mismo qr, y se corrige acceso por DNI/RFID
+  [QAW-10127] | v17.1.4] - (09/05/2023 | Se agregan tests de acceso a multiples areas de trabajo con mismo qr, y se corrige acceso por DNI/RFID.
+  [QAW-8783] | v16.1.8] - (06/02/2023 | Se agrega eliminacion de la zona de area de trabajo y a su vez se desvinculan las puertas de la zona.
+  [QAW-9234] | v16.1.8] - (06/02/2023 | Se corrige la validación de placas al editar/crear vehículos de un usuario.
+  [QAW-6164] | v8.5.1] - (16/05/2022 | Añadir columna de RFID en importación de usuarios (excel).
+  [QAW-6000] | v8.4.1] - (05/05/2022 | Se corrige bug al consultar persona en el acceso usando rfid.
+  [QAW-3986] | v4.4.9] - (25/11/2021 | Se muestran todos los grupos de puertas en el selector del formulario de editar/crear usuario.
+  [QAW-3994] | v4.4.9] - (25/11/2021 | El registro de placas con cámara Vivotek, solo se valida cuando el webhook apunta a puerta y no a zona.
+  [QAW-4151] | v4.4.9] - (25/11/2021 | Se agrega validación en creación de puertas, para evitar que se puedan registrar dobles, los qr de entrada y salida.
+  [QAW-3848] | v4.3.0] - (03/11/2021 | Se valida de mejor manera el QR, ahora es sensible a mayusculas.
+  [QAW-3848] | v4.0.5] - (22/10/2021 | Se valida de mejor manera el QR, ahora es sensible a mayusculas.
+  [QAW-3134] | v3.0.8] - (24/09/2021 | Se elimina rfid del usuario cuando se le deshabilita la opcion de acceso por rfid.
+  [QAW-3548] | v3.0.8] - (24/09/2021 | Se corrige que al deshabilitar RFID de una copropiedad, el usuario aún conserve el selector de acceso por tarjeta.
+  [QAW-2887] | v2.0.9] - (11/08/2021 | Se corrige que si se importa varias veces el mismo usuario pero desde distintas copropiedades, se mantengan las puertas, grupos de puertas y zonas en todo momento.
+  [QAW-2727] | v2.0.9] - (11/08/2021 | Se agrega validación de placa para formato viejo de moto en la importación de usuarios desde Excel.
+  [QAW-2515] | v2.0.5] - (05/08/2021 | Se cargan las puertas y grupos de puertas de acuerdo a las asignadas a el.
+  [QAW-2491] | v1.17.0] - (29/06/2021 | Se valida que la placa de vehículo en el módulo de vehículos sea única.
+  [QAW-2415] | v1.17.0] - (29/06/2021 | Se soluciona el error de habilitar el boton de rfid en la creacion y edicion de usuario.
+  [QAW-1565] | v1.6.0] - (13/01/2021 | Se arregla la edición de antipassback de zona en editar copropiedad
+
+
+================================================================================
+MÓDULO: SINCRONIZACIÓN (DA / FACIAL / MQTT)
+Total de bugs históricos: 18
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Evento de sincronización enviado duplicado al actualizar usuario
+  • Sincronización facial no se ejecuta al cambiar settings de RFID
+  • Cuentas inactivas de DA generan errores en sincronización
+  • Archivo de resumen de importación DA se sobreescribe con importaciones simultáneas
+  • Sincronización incorrecta cuando usuario tiene copropiedad eliminada
+  • Registros faciales no se sincronizan correctamente
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [181] | 27.9.3] - (22/01/2026 | Se ajusta flujo de sincronización facial con rfid, para que la sincronización se ejecute cuando cambie alguno de los 2 settings, y no solo cuando cambie el acceso facial.
+  [RT-I1268] | 27.9.2] - (14/01/2026 | Se ajusta el nombre del archivo con resumen de importación de DA para evitar que se sobrescriba cuando otra importación finalice en el mismo instante.
+  [RT-I1216] | 27.7.0] - (30/12-2025 | Se ajusta actualización de usuarios, para evitar que se envié duplicado el evento de sincronización y se envíe evento al eliminar puertas del usuario.
+  [RT-I385] | 27.5.2] - (04/12-2025 | Se excluyen cuentas de usuarios con sincornización activa de DA del comando de eliminación. Adicionalmente se añade validación en sincronización de DA, para controlar errores de ceuntas inactivas.
+  [QIOT] | v26.6.2] - (16/01/2025 | Se corrige sincronizacion de registros faciales.
+  [QAW] | v26.1.2] - (27/09/2024 | Se mejora conexion para publicar cambios real-time en sincronizacion, y se establece solo instancia de persona en evento sincronizacion.
+  [QAW-15675] | v23.1.1] - (16/07/2024 | Se corrige error al ejecutar sincronización automática de DA, cuando no se detectan cambios para actualizar.
+  [QAW-14812] | v22.0.2] - (27/04/2024 | Se mejora la calidad para los perfiles usados en accesos facial.
+  [QAW-14099] | v20.7.5] - (12/02/2024 | Se ajusta en DA de Google, para listar solo miembros de tipo USER dentro de los grupos.
+  [QAW-13973] | v20.7.4] - (05/02/2024 | Se ajusta flujo de autenticacion con cuentas de servicio en conexión con DA de Google.
+  [QIOT-2344] | v20.7.1] - (18/01/2024 | [QAW-13790] Se sincroniza en tiempo real el registro de una persona con acceso facial, al actualizar solo la imagen de perfil.
+  [QIOT-2312] | v20.5.0] - (22/12/2023 | Se usa el numero de tarjeta para identificar al usuario en la sincronización facial con el dispositivo, evitando usar el numero de DNI.
+  [QAW-12371] | v19.3.0] - (20/10/2023 | Se corrige búsqueda de persona en el acceso por mqtt.
+  [QIOT-1449] | v19.3.0] - (20/10/2023 | Se agrega procesamiento de sincronización masiva offline en colas dividiendo la consulta en partes y publicando de la misma manera con mqtt.
+  [QAW-9855] | v17.0.0] - (28/04/2023 | Se elimina validacion por copropiedad en la obtencion de los datos de persona en el trait de acceso por mqtt
+  [QAW-7745] | v13.0.2] - (06/10/2022 | Se separa busqueda de la persona en accesso por mqtt por rfid y dni para evitar
+  [QIOT-1074] | v12.1.1] - (20/09/2022 | Se verifica mensajes duplicados en el comando subscriptor de accessos mqtt para evitar duplicidad de registros.
+  [QAW-5408] | v6.3.0] - (8/03/2022 | Se cambia el nombre que se muestra en la lista de usuarios a importar en el Directorio Activo (Nombre para mostrar por nombre y apellido)
+
+
+================================================================================
+MÓDULO: EMPRESAS Y COPROPIEDADES
+Total de bugs históricos: 18
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Empresas compartidas entre copropiedades desaparecen al editar por Property Owner
+  • Filtrado de empresas no respeta permisos del usuario en sesión
+  • Validación de empresas para usuarios con múltiples empresas en aforo falla
+  • Relación entre autorizaciones y empresas eliminadas no se gestiona correctamente
+  • Redirecciones por defecto incorrectas cuando la copropiedad no tiene módulos activos
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [RT-I890] | 27.2.1] - (2/10/2025 | Se corrige bug donde empresas compartidas entre copropiedades desaparecían al ser editadas por Property Owners.
+  [QAW-12302] | v19.2.0] - (10/10/2023 | Se adicionan redirecciones por defecto cuando la copropiedad no tiene módulos activos.
+  [QAW-11397] | v18.7.2] - (08/08/2023 | [QAW-11434] Al eliminar/desactivar copropiedades, se hace también con las empresas relacionadas.
+  [QAW-11254] | v18.0.0] - (26/07/2023 | Se ajusta la búsqueda de áreas de trabajo por múltiples copropiedades.
+  [QAW-10614] | v17.6.1] - (08/06/2023 | Se agrega parámetro de copropiedad al filtro de ocupación de areas de trabajo, dado que el area de trabajo ya no es obligatoria.
+  [QAW-9641] | v17.6.0] - (07/06/2023 | Se corrige la generación de la dirección al mover el marcador en el mapa del formulario de creación de copropiedad.
+  [QAW-9703] | v17.6.0] - (07/06/2023 | Se ajustan valores de configuración por defecto al crear una copropiedad.
+  [QAW-9642] | v17.3.15] - (25/05/2023 | Se corrige error en el filtro de empresa en el dashboard de áreas
+  [QAW-9749] | v17.0.0] - (28/04/2023 | Se corrige el ui de la vista de edición/creación de copropiedades.
+  [QAW-9347] | v16.4.2] - (07/03/2023 | Se corrige error de la dependencia de empresas por filtro en el dashboard de control de acceso
+  [QAW-8703] | v15.2.6] - (15/12/2022 | Se actualiza endpoint de selector de copropiedades para devolver solo las que tengan áreas de trabajo.
+  [QAW-4869] | v7.0.0] - (15/03/2022 | Se corrige problema al intentar agregar o eliminar un aforo por empresa en una zana.
+  [QAW-2321] | v2.0.0] - (14/07/2021 | Correción al momento de conceder permisos de "Activities" a coordinadores, estos luego aparecen con 2 activities de listar en modulo de Empresas.
+  [QAW-2500] | v1.16.7] - (28/06/2021 | Se corrige la consulta que obtiene las zonas y empresas con aforo en la aplicación móvil.
+  [QAW-1763] | v1.12.0] - (17/03/2021 | Se deshabilita botón en ventana de crear nueva empresa, para prevenir multiples creaciones de la misma.
+  [QAW-1704] | v1.12.0] - (17/03/2021 | Se corrige el error de crear multiples copropiedades al pulsar multiples veces el boton
+  [QAW-1762] | v1.12.0] - (17/03/2021 | Se corrige el manejo de error al darle varias veces al botón para borrar empresa y para restaurarla.
+  [QAW-1764] | v1.12.0] - (17/03/2021 | Se arregla selector de empresa en la pestaña de datos básicos de
+
+
+================================================================================
+MÓDULO: HISTORIAL DE ACCESOS
+Total de bugs históricos: 11
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Filtro por usuarios en historial no funciona correctamente
+  • Filtrado de empresas no respeta permisos del usuario en sesión en exportación
+  • Error al ver historial desde modal de usuario
+  • Búsqueda por RFID en historial incorrecta
+  • Exportación no incluye datos correctos de empresa y comentario de visitantes
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [RT-I950] | 27.3.1] - (20/10/2025 | Se corrige el fallo al filtrar por usuarios en access history.
+  [Man-I40] | 26.20.0] - (05/06/2025 | Se corrige filtrado de empresas para que sólo tome las empresas a las que tiene permiso de ver el usuario en sesión en exportacion de: Usuarios, usuarios desde empresa, historial de acceso.
+  [QAW-12029] | v19.0.1] - (11/09/2023 | Se corrige el error al ver historial de accesos desde modal de usuario.
+  [QAW-10569] | v18.8.6] - (29/08/2023 | Al exportar el historial de accesos, se adiciona la cantidad de días en la columna de permanencia.
+  [QAW-100053] | v17.0.0] - (28/04/2023 | Se corrige el error de historial de acceso para safari
+  [QAW-6264] | v8.7.5] - (26/05/2022 | y [QAW-6265] Filtrar por locker tanto en la pantalla del historial de accesos como en la exportación a Excel.
+  [QAW-3144] | v2.9.0] - (13/09/2021 | Se agrega filtro de Actividad en la copropiedad en la exportación del historial de accesos.
+  [QAW-3147] | v2.9.0] - (13/09/2021 | Se corrige el posicionamiento de los inputs en el filtro de Historial de accesos.
+  [QAW-3061] | v2.4.1] - (26/08/2021 | Se aplica el mismo filtro de empresa en listado de historial de acceso
+  [QAW-3052] | v2.4.1] - (26/08/2021 | Se arregla un fallo cuando se le concede acceso manual a un usuario y luego este sale o entra con QR o cédula,lo cual provocaba un registro nuevo en el historial de acceso.
+  [QAW-1873] | v1.15.0] - (15/04/2021 | Se corrige que en la tabla de historial de accesos al aplicar filtros deshabilita la búsqueda.
+
+
+================================================================================
+MÓDULO: CAMPOS PERSONALIZADOS Y FORMULARIOS
+Total de bugs históricos: 10
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Edición de campo personalizado tipo Selector falla
+  • Listado de campos tipo opción con muchas opciones no carga
+  • Respuestas de campos personalizados no se muestran al editar usuario
+  • Selector de formularios en área de trabajo no envía el valor correcto
+  • Filtro de fechas incorrecto en formularios de salubridad
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [RT-I463] | 26.22.3] - (08/07/2025 | Se añaden permisos en rutas para los roles que requieren ver las opciones de campos personalizados.
+  [RT-I427] | 26.22.2] - (04/07/2025 | Se corrige el fallo al listar campos personalizados tipo opción cuando hay muchas opciones.
+  [QUEOA-387] | v26.2.1] - (10/10/2024 | Se corrige edición de campo personalizado de tipo Selector.
+  [QAW-100070] | v17.0.0] - (28/04/2023 | Se corrige el error de filtro de fechas para actividades y formularios de salubridad
+  [QAW-9739] | v17.0.0] - (28/04/2023 | Se corrige el error al de formularios en todas las vistas
+  [QAW-9859] | v17.0.0] - (28/04/2023 | Se ajustan los métodos del formulario de vehículos, eliminando el uso de repositorios.
+  [QAW-7902] | v14.0.2] - (31/10/2022 | Se corrige selector de formularios en area de trabajo, el cual no estaba enviando el valor correctamente.
+  [QAW-4177] | v4.4.0] - (19/11/2021 | Se corrige error en el comando de generar formularios, con respecto a un id y a un label incorrecto.
+  [QAW-2223] | v2.0.9] - (11/08/2021 | Se realiza el rediseño del formulario de sanidad.
+  [QAW-1641] | v1.7.2] - (08/02/2021 | Se Agrega una verificación para el comentario en el formulario
+
+
+================================================================================
+MÓDULO: NOTIFICACIONES Y CORREOS
+Total de bugs históricos: 8
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Correo de autorización no muestra botón de acceso
+  • Mensajes no se visualizan correctamente en Gmail, Hotmail, Yahoo, ZohoMail
+  • Correo de cancelación de reserva se envía aunque el setting esté apagado
+  • Error al recuperar contraseña (envío de correo)
+  • Link de política de privacidad desactualizado en plantillas
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [RT-I104] | 27.9.2] - (14/01/2026 | Se ajusta los mensajes para ser vistos correctamente en los diferentes dominios (gmail, hotmail, yahoo, zohomail)
+  [QAW-10671] | v21.1.0] - (11/04/2024 | Se crea endpoint para consultar token de notificaciones.
+  [QAW-13847] | v20.7.2] - (22/01/2024 | Se ajusta link de privacidad https://queo.com.co/privacidad por https://queoaccess.com/privacidad/ en plantillas de correo electrónico.
+  [QAW-9857] | v17.0.0] - (28/04/2023 | Se corrige error en el envío de correo al intentar recuperar contraseña.
+  [QAW-9202] | v16.1.8] - (06/02/2023 | Se agrega texto de aceptación de política de datos en el correo de bienvenida.
+  [QAW-7812] | v15.0.2] - (04/11/2022 | Se corrigue el envio repetido de notificacion expo.
+  [QAW-6937] | v12.1.0] - (26/08/2022 | Se corrige condicion para validar espacio de trabajo en eventos de notificacion de areas.
+  [QAW-1750] | v2.0.9] - (11/08/2021 | Se mejora el comportamiento del mensaje de error al eliminar zona con zonas asociadas.
+
+
+================================================================================
+MÓDULO: VEHÍCULOS
+Total de bugs históricos: 2
+================================================================================
+
+PATRONES DE FALLO RECURRENTES (usar para generar casos de prueba negativos):
+------------------------------------------------------------
+  • Doble clic en 'Crear Vehículo' genera duplicados
+  • Al eliminar vehículo de datos básicos no se elimina del listado
+  • Error en modal de creación/edición de vehículos
+
+BUGS REGISTRADOS (ticket | versión | descripción):
+------------------------------------------------------------
+  [QAW-10074] | v17.0.0] - (28/04/2023 | Se corrige error en el modal de creación/edición de vehículos
+  [QAW-2286] | v2.0.0] - (14/07/2021 | Se corrige que al agregar vehículo al hacer doble clic en "Crear Vehículo" se duplica.
+
+
+================================================================================
+FIN DEL KNOWLEDGE BASE
+================================================================================
