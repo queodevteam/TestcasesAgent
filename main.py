@@ -1,11 +1,18 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from qa_agent.agent import QATestCaseArchitect
 
 
 app = FastAPI(title="Test Case Architect Agent v1")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 _agent: QATestCaseArchitect | None = None
 
