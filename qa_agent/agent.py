@@ -89,7 +89,7 @@ Responde SOLO en JSON válido con esta forma:
 """
 
 
-def load_knowledge_documents(knowledge_dir: str) -> list[Document]:
+def load_knowledge_documents(knowledge_dir: str, chunk_size: int = 400, overlap: int = 50) -> list[Document]:
     base = Path(knowledge_dir)
     docs: list[Document] = []
     if not base.exists() or not base.is_dir():
@@ -104,7 +104,15 @@ def load_knowledge_documents(knowledge_dir: str) -> list[Document]:
         if not content:
             continue
 
-        docs.append(Document(content=content, meta={"source": str(p.name)}))
+        words = content.split()
+        if len(words) <= chunk_size:
+            docs.append(Document(content=content, meta={"source": str(p.name)}))
+        else:
+            step = chunk_size - overlap
+            for i, start in enumerate(range(0, len(words), step)):
+                chunk = " ".join(words[start: start + chunk_size])
+                if chunk.strip():
+                    docs.append(Document(content=chunk, meta={"source": str(p.name), "chunk": i}))
 
     return docs
 
@@ -187,4 +195,15 @@ class QATestCaseArchitect:
 
         replies = result.get("generator", {}).get("replies", [])
         text = replies[0] if replies else ""
-        return {"raw": text, "retrieved_documents": [d.meta for d in result.get("retriever", {}).get("documents", [])]}
+        text = self._strip_markdown_fences(text)
+        retrieved = result.get("retriever", {}).get("documents", [])
+        return {"raw": text, "retrieved_documents": [d.meta for d in retrieved]}
+
+    @staticmethod
+    def _strip_markdown_fences(text: str) -> str:
+        text = text.strip()
+        if text.startswith("```"):
+            text = text[text.index("\n") + 1:] if "\n" in text else text[3:]
+        if text.endswith("```"):
+            text = text[: text.rfind("```")]
+        return text.strip()
